@@ -217,6 +217,18 @@
       <DependentUpon>SpeedrunComOAuthForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Web\Share\SpeedrunComRunUploadPlatform.cs" />
+    <Compile Include="WinUtils\Dialogs\InputBox.cs" />
+    <Compile Include="WinUtils\Dialogs\PickIconDialog.cs" />
+    <Compile Include="WinUtils\Dialogs\TaskDialog.cs" />
+    <Compile Include="WinUtils\DPI.cs" />
+    <Compile Include="WinUtils\FormUtils.cs" />
+    <Compile Include="WinUtils\IconManager.cs" />
+    <Compile Include="WinUtils\LayeredWindowHelper.cs" />
+    <Compile Include="WinUtils\ToolStripNonClientRenderer.cs" />
+    <Compile Include="WinUtils\Win10Style.cs" />
+    <Compile Include="WinUtils\Win7Style.cs" />
+    <Compile Include="WinUtils\WinAPI.cs" />
+    <Compile Include="WinUtils\WinVer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\Settings.settings">

@@ -36,6 +36,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
 using UpdateManager;
+using WinUtils;
 
 namespace LiveSplit.View
 {
@@ -91,7 +92,7 @@ namespace LiveSplit.View
             get
             {
                 var cp = base.CreateParams;
-                cp.Style |= WS_MINIMIZEBOX;
+                cp.Style |= Constants.WS_SYSMENU;
                 cp.ClassStyle |= CS_DBLCLKS;
                 return cp;
             }
@@ -108,42 +109,6 @@ namespace LiveSplit.View
 
         public string BasePath { get; set; }
         protected IEnumerable<RaceProviderAPI> RaceProvider { get; set; }
-
-        private bool MousePassThrough
-        {
-            set
-            {
-                const int GWL_EXSTYLE = -20;
-
-                const uint WS_EX_LAYERED = 0x00080000;
-                const uint WS_EX_TRANSPARENT = 0x00000020;
-
-                // If we're trying to set to false and it's already false, don't bother doing anything.
-                // We can't do this for setting to true because setting Opacity may have messed the GWL_EXSTYLE flags up.
-                if (!value && !MousePassThroughState)
-                    return;
-                MousePassThroughState = value;
-
-                var prevWindowLong = GetWindowLong(Handle, GWL_EXSTYLE);
-                if (value)
-                {
-                    if ((prevWindowLong & (WS_EX_LAYERED | WS_EX_TRANSPARENT)) != (WS_EX_LAYERED | WS_EX_TRANSPARENT))
-                    {
-                        // We have to add WS_EX_LAYERED, because WS_EX_TRANSPARENT won't work otherwise.
-                        prevWindowLong |= WS_EX_LAYERED | WS_EX_TRANSPARENT;
-                        SetWindowLong(Handle, GWL_EXSTYLE, prevWindowLong);
-                    }
-                }
-                else
-                {
-                    // Not removing WS_EX_LAYERED because it may still be needed if Opacity != 1.
-                    // It shouldn't really affect anything and setting Form.Opacity to 1 will remove it anyway:
-                    prevWindowLong &= ~WS_EX_TRANSPARENT;
-                    SetWindowLong(Handle, GWL_EXSTYLE, prevWindowLong);
-                }
-            }
-        }
-        private bool MousePassThroughState = false;
 
         private bool IsForegroundWindow
         {
@@ -1306,9 +1271,6 @@ namespace LiveSplit.View
             DrawBackground(g);
 
             Opacity = Layout.Settings.Opacity;
-
-            // Set MousePassThrough after setting Opacity, because setting Opacity can reset the Form's WS_EX_LAYERED flag.
-            MousePassThrough = Layout.Settings.MousePassThroughWhileRunning && Model.CurrentState.CurrentPhase == TimerPhase.Running && !IsForegroundWindow;
 
             if (Layout.Settings.AntiAliasing)
                 g.TextRenderingHint = TextRenderingHint.AntiAlias;
@@ -2918,6 +2880,14 @@ namespace LiveSplit.View
             {
                 e.Effect = DragDropEffects.None;
             }
+        }
+
+        private void TimerForm_Load(object sender, EventArgs e)
+        {
+                (new LayeredWindowHelper(this)).BackColor = Layout.Settings.BackgroundColor;
+
+                Win7Style.EnableBlurBehindWindow(this.Handle);
+                Win10Style.EnableBlur(this.Handle);
         }
     }
 }
